@@ -20,7 +20,14 @@
 
 
 /* Export the version number: */
-const int VLDMAIL_VERSION = 100; // 0.1.0
+const int VLDMAIL_VERSION = 101; // 0.1.1
+
+
+/* Loop leaving macro when a check fails: */
+#define BREAK_LOOP_FAIL(msg) \
+  ret.success = 0;           \
+  wcscat(ret.message, msg);  \
+  break;
 
 
 vldmail validate_email(const wchar_t address[320]) {
@@ -115,32 +122,24 @@ vldmail validate_email(const wchar_t address[320]) {
 
         /* Check for ASCII (or UTF-8) overflow: */
         if (codepoint > MAX_CODEPOINT) {
-            ret.success = 0;
-            wcscat(ret.message, L"One or more characters in your e-mail address are too high.\n");
-            break;
+            BREAK_LOOP_FAIL(L"One or more characters in your e-mail address are too high.\n");
         }
 
         /* Check for leading or trailing spaces or dots: */
         if ((codepoint == 46 || codepoint == 32) && (prev_codepoint == -1 || next_codepoint == -1 || (!in_quote && !in_comment && next_codepoint == 64))) {
-            ret.success = 0;
-            wcscat(ret.message, L"Leading and trailing spaces and dots are invalid in an e-mail address.\n");
-            break;
+            BREAK_LOOP_FAIL(L"Leading and trailing spaces and dots are invalid in an e-mail address.\n");
         }
 
         /* Check for double dots: */
         if (codepoint == 46 && next_codepoint == 46 && !in_quote) {
-            ret.success = 0;
-            wcscat(ret.message, L"Double dots are not allowed outside quotation marks.\n");
-            break;
+            BREAK_LOOP_FAIL(L"Double dots are not allowed outside quotation marks.\n");
         }
 
         /* Check for comments: */
         if (codepoint == 40) {
             if (in_comment && !masked) {
                 /* (( ... */
-                ret.success = 0;
-                wcscat(ret.message, L"Unmasked opening parenthesis inside a comment.\n");
-                break;
+                BREAK_LOOP_FAIL(L"Unmasked opening parenthesis inside a comment.\n");
             }
 
             /* Set the comment position: */
@@ -166,15 +165,11 @@ vldmail validate_email(const wchar_t address[320]) {
                 if ((comment_local_end && next_codepoint != 64) || (comment_domain_end && next_codepoint != -1)) {
                     /* On end comments, we assume an "@" (local) or "nothing" (domain) after the closing parenthesis.
                        Something else is here. */
-                    ret.success = 0;
-                    wcscat(ret.message, L"Wrong comment syntax: unexpected character after the closing parenthesis.\n");
-                    break;
+                    BREAK_LOOP_FAIL(L"Wrong comment syntax: unexpected character after the closing parenthesis.\n");
                 }
             }
             else if (!in_quote) {
-                ret.success = 0;
-                wcscat(ret.message, L"Unmatched closing parenthesis outside a comment.\n");
-                break;
+                BREAK_LOOP_FAIL(L"Unmatched closing parenthesis outside a comment.\n");
             }
         }
 
@@ -186,9 +181,7 @@ vldmail validate_email(const wchar_t address[320]) {
 
             if (codepoint == 64) {
                 /* A new "at" inside the domain part... */
-                ret.success = 0;
-                wcscat(ret.message, L"One @ is more than enough.\n");
-                break;
+                BREAK_LOOP_FAIL(L"One @ is more than enough.\n");
             }
 
             if (len_domain == 0 && codepoint == 91) {
@@ -199,9 +192,7 @@ vldmail validate_email(const wchar_t address[320]) {
             len_domain++;
             if (len_domain > 255) {
                 /* Domain part too long. */
-                ret.success = 0;
-                wcscat(ret.message, L"This address's domain part exceeds 255 characters.\n");
-                break;
+                BREAK_LOOP_FAIL(L"This address's domain part exceeds 255 characters.\n");
             }
 
             if (codepoint == 46) {
@@ -226,9 +217,7 @@ vldmail validate_email(const wchar_t address[320]) {
                 /* This could be the end of an IP domain. */
                 if (next_codepoint != -1) {
                     /* Well, it is not. */
-                    ret.success = 0;
-                    wcscat(ret.message, L"Unexpected characters after the end of an IP block.\n");
-                    break;
+                    BREAK_LOOP_FAIL(L"Unexpected characters after the end of an IP block.\n");
                 }
                 else {
                     /* IP validation:
@@ -306,9 +295,7 @@ vldmail validate_email(const wchar_t address[320]) {
 
                 switchend:
                     if (!ip_is_valid) {
-                        ret.success = 0;
-                        wcscat(ret.message, L"Erroneous IP address found - try again.\n");
-                        break;
+                        BREAK_LOOP_FAIL(L"Erroneous IP address found - try again.\n");
                     }
                 }
             }
@@ -325,9 +312,7 @@ vldmail validate_email(const wchar_t address[320]) {
 
                 if (!is_allowed) {
                     /* Nope. */
-                    ret.success = 0;
-                    wcscat(ret.message, L"Invalid character found outside a quotation.\n");
-                    break;
+                    BREAK_LOOP_FAIL(L"Invalid character found outside a quotation.\n");
                 }
             }
         }
@@ -338,9 +323,7 @@ vldmail validate_email(const wchar_t address[320]) {
             if (codepoint == 64 && !masked && !in_quote) {
                 if (in_comment) {
                     /* Unmasked @ where it does not belong. */
-                    ret.success = 0;
-                    wcscat(ret.message, L"Unmasked @ found in an unexpected place.\n");
-                    break;
+                    BREAK_LOOP_FAIL(L"Unmasked @ found in an unexpected place.\n");
                 }
                 has_at = 1;
 
@@ -355,9 +338,7 @@ vldmail validate_email(const wchar_t address[320]) {
             len_local++;
             if (len_local > 64) {
                 /* Local part too long. */
-                ret.success = 0;
-                wcscat(ret.message, L"This address's local part exceeds 64 characters.\n");
-                break;
+                BREAK_LOOP_FAIL(L"This address's local part exceeds 64 characters.\n");
             }
 
             if (!masked) {
@@ -368,9 +349,7 @@ vldmail validate_email(const wchar_t address[320]) {
                         if (next_codepoint != 64) {
                             if (next_codepoint != 40 && next_codepoint != 43 && next_codepoint != 46) {
                                 /* The next character must be either of [.(+@]. It is not. */
-                                ret.success = 0;
-                                wcscat(ret.message, L"Wrong quotation (end).\n");
-                                break;
+                                BREAK_LOOP_FAIL(L"Wrong quotation (end).\n");
                             }
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
@@ -391,9 +370,7 @@ vldmail validate_email(const wchar_t address[320]) {
                         if (prev_codepoint != -1) {
                             if (prev_codepoint != 41 && prev_codepoint != 46) {
                                 /* The previous character must be either of [.)]. It is not. */
-                                ret.success = 0;
-                                wcscat(ret.message, L"Wrong quotation (start).\n");
-                                break;
+                                BREAK_LOOP_FAIL(L"Wrong quotation (start).\n");
                             }
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
@@ -439,9 +416,7 @@ vldmail validate_email(const wchar_t address[320]) {
                     }
                     if (!is_allowed) {
                         /* Nope. */
-                        ret.success = 0;
-                        wcscat(ret.message, L"Invalid character found outside a quotation.\n");
-                        break;
+                        BREAK_LOOP_FAIL(L"Invalid character found outside a quotation.\n");
                     }
                 }
             }
@@ -457,7 +432,6 @@ vldmail validate_email(const wchar_t address[320]) {
     /* Finishing tests: */
 
     if (wcslen(domain) > 0 && wcsncmp(domain, L"localhost", wcslen(domain)) == 0 && ret.success) {
-        /* Check if we have reached the end. If so, deny localhost. */
         ret.success = 0;
         wcscat(ret.message, L"'localhost' is actually not a valid hostname - sorry.\n");
     }

@@ -1,0 +1,8 @@
+libvldmail change log
+---------------------
+
+0.1.1 [2018-02-25]:
+- Introducing the BREAK_LOOP_FAIL macro, (Thank you, stsc.)
+
+0.1.0 [2018-02-24]:
+- Initial version.
