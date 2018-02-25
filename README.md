@@ -4,7 +4,7 @@ Your friendly e-mail address validation library.
 
 ## Why?
 
-* Did you know that newline characters, spaces and - according to the [RFC 6531](https://tools.ietf.org/html/rfc6531) document - emojis can be a part of a valid e-mail address?
+* Did you know that parentheses, spaces and - according to the [RFC 6531](https://tools.ietf.org/html/rfc6531) document - emojis can be a part of a valid e-mail address?
 * Did you know that both IPv6 addresses and resources in your intranet are valid parts of the part after the "@", so requiring a TLD (*xxxx.yy*) is entirely wrong?
 
 Nor do all of the existing (and more complex than "is there an @ character?") validators I've come across. So this is my approach.
