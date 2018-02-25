@@ -6,7 +6,6 @@
 #include <wchar.h>
 #include <locale.h>
 #include <wctype.h>
-#include <stdio.h>
 
 #include "vldmail.h"
 
