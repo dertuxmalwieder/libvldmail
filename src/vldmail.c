@@ -456,10 +456,10 @@ vldmail validate_email(const wchar_t address[320]) {
     /* ---------------- */
     /* Finishing tests: */
 
-    /* Check if we have reached the end. If so, deny localhost. */
     if (wcslen(domain) > 0 && wcsncmp(domain, L"localhost", wcslen(domain)) == 0 && ret.success) {
+        /* Check if we have reached the end. If so, deny localhost. */
         ret.success = 0;
-        wcscat(ret.message, L"'localhost' is actually not a valid hostname - sorry.");
+        wcscat(ret.message, L"'localhost' is actually not a valid hostname - sorry.\n");
     }
 
     if (in_comment && ret.success) {
