@@ -2,7 +2,8 @@ libvldmail change log
 ---------------------
 
 0.1.1 [2018-02-25]:
-- Introducing the BREAK_LOOP_FAIL macro, (Thank you, stsc.)
+- Introducing the BREAK_LOOP_FAIL macro. (Thank you, stsc.)
+- Improved output of one of the validation messages.
 
 0.1.0 [2018-02-24]:
 - Initial version.
