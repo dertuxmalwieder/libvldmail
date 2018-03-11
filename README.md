@@ -78,7 +78,7 @@ Yes, I like money as well.
 
 ## Help me, please?
 
-I accept pull requests if they are related to adding RFC-compatibility. This library is (somewhat) working, but it is probably not quite perfect yet. You are invited to list yourself as a contributor below this paragraph if you need your merits:
+I accept pull requests if they are related to adding RFC-compatibility. This library seems to be working as intended, but - just like every other software - there might be quirks which I have not come across yet. You are invited to list yourself as a contributor below this paragraph if you need your merits:
 
 ### Contributors
 

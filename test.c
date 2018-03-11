@@ -3,55 +3,47 @@
    copyright for a test file?
    Note that I assume Unicode here. No tests for ASCII frogs!
 */
+
 #include <stdio.h>
+#include <locale.h>
+#include <wchar.h>
 #include <vldmail.h>
 
-int main(void) {
+static void test(const wchar_t *address, int success) {
     vldmail validator;
+    printf("  %-78ls", address);
+    validator = validate_email(address);
+    printf(validator.success == success ? "passed" : "failed");
+    if (validator.success == 0) {
+        printf("\n    error: %ls\n", validator.message);
+    }
+    else {
+        printf("\n");
+    }
+}
+
+
+int main(void) {
+    setlocale(LC_ALL, "");
 
     printf("Basic tests.\n");
     printf("\n");
 
-    printf("  foo@bar.quux:         ");
-    validator = validate_email(L"foo@bar.quux");
-    printf(validator.success == 1 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
-
-    printf("  hügö@müller.berlin:   ");
-    validator = validate_email(L"hügö@müller.berlin");
-    printf(validator.success == 1 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
-
-    printf("  admin@localhost:      "); /* Tricky, but the RFC suggests that this is invalid. */
-    validator = validate_email(L"admin@localhost");
-    printf(validator.success == 0 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
-
-    printf("  🎃@emojiguy:          "); /* Valid if inside the local network ... */
-    validator = validate_email(L"🎃@emojiguy");
-    printf(validator.success == 1 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
+    test(L"foo@bar.quux", 1);
+    test(L"hügo@müller.berlin", 1);
+    test(L"admin@localhost", 0); /* Tricky, but the RFC suggests that this is invalid. */
+    test(L"🎃@emojiguy", 1); /* Valid if inside the local network ... */
 
     /* Tests from Wikipedia et al.: */
     printf("\n");
     printf("Advanced tests.\n");
     printf("\n");
 
-    printf("  foo@[192.168.0.1]:                                                      ");
-    validator = validate_email(L"foo@[192.168.0.1]");
-    printf(validator.success == 1 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
+    test(L"foo@[192.168.0.1]", 1);
+    test(L"\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com", 1); /* Valid thanks to quoting. */
+    test(L"\" \"@provider.tld", 1); /* Seems to be valid according to the RFCs. Wikipedia says otherwise. But there is no obvious reason for that. */
 
-    printf("  \"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com: "); /* Valid thanks to quoting. */
-    validator = validate_email(L"\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com");
-    printf(validator.success == 1 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
-
-    printf("  \" \"@provider.tld:                                                       "); /* Seems to be valid according to the RFCs. */
-    /* (Wikipedia says otherwise. But there is no obvious reason for that.) */
-    validator = validate_email(L"\" \"@provider.tld");
-    printf(validator.success == 1 ? "passed" : "failed");
-    if (validator.success == 0) printf("\n    error: %ls\n", validator.message); else printf("\n");
+    printf("\n");
 
     return 0;
 }
