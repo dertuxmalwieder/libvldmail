@@ -1,5 +1,11 @@
+------------------------------------------------------------
 libvldmail change log
----------------------
+------------------------------------------------------------
+These are the changes in the vldmail library. Other files
+like the README and test.c are not considered here. Please
+refer to the git log if you care about those as well.
+------------------------------------------------------------
+
 
 0.1.1 [2018-02-25]:
 - Introducing the BREAK_LOOP_FAIL macro. (Thank you, stsc.)

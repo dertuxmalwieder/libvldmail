@@ -8,8 +8,10 @@ include_directories(src)
 # Build the library:
 add_library(vldmail STATIC src/vldmail.c)
 
-# Build the test program:
-add_executable(vldmailtest test.c)
+if (BUILD_THE_TEST)
+  # Build the test program if not unwanted:
+  add_executable(vldmailtest test.c)
 
-# Link the test program:
-target_link_libraries(vldmailtest vldmail)
+  # Link the test program if not unwanted:
+  target_link_libraries(vldmailtest vldmail)
+endif ()

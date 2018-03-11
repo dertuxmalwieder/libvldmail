@@ -49,6 +49,12 @@ You should be able to use `libvldmail` from inside Ruby, Python. Lisp etc. with 
 
 Use [CMake](https://cmake.org/) to create the `libvldmail` library, then link it into your application. And don't forget to point to the `vldmail.h` header.
 
+### Building the test file as well
+
+By default, CMake does not build `test.c` which tries to test the library's basic functions. If you want to test `libvldmail` using it, please just pass the parameter `BUILD_THE_TEST` to CMake:
+
+    cmake . -DBUILD_THE_TEST=1
+
 ## Versioning
 
 `libvldmail` tries to follow the [Semantic Versioning](https://semver.org/) scheme. You can ask for the current version via the API:
