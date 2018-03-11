@@ -36,7 +36,7 @@ You should be able to use `libvldmail` from inside Ruby, Python. Lisp etc. with 
     int main(void) {
         /* ... your code ... */
         
-        vldmail validator = validate_email("foo@bar.quux");
+        vldmail validator = validate_email(L"foo@bar.quux");
         if (0 == validator.success) {
             /* success == 0 means that something was wrong. */
             printf("Validating foo@bar.quux failed: %ls\n", validator.message);
