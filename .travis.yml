@@ -4,9 +4,6 @@ compiler:
     - gcc
     - clang
 
-env:
-    - CFLAGS=-std=c99
-
 before_script:
     - mkdir build
     - cd build
