@@ -1,4 +1,4 @@
-# libvldmail
+# libvldmail [![Build Status](https://travis-ci.org/dertuxmalwieder/libvldmail.svg?branch=master)](https://travis-ci.org/dertuxmalwieder/libvldmail)
 
 Your friendly e-mail address validation library.
 
@@ -39,7 +39,7 @@ You should be able to use `libvldmail` from inside Ruby, Python. Lisp etc. with 
         vldmail validator = validate_email(L"foo@bar.quux");
         if (0 == validator.success) {
             /* success == 0 means that something was wrong. */
-            printf("Validating foo@bar.quux failed: %ls\n", validator.message);
+            printf(L"Validating foo@bar.quux failed: %ls\n", validator.message);
         }
         
         /* ... more of your code ... */
