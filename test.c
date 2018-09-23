@@ -11,6 +11,14 @@
 
 int test_counter = 0;
 
+static void note(const wchar_t *message) {
+    printf("# %ls\n", message);
+}
+
+static void diag(const wchar_t *message) {
+    fprintf(stderr, "# %ls\n", message);
+}
+
 static void test(const wchar_t *address, int success) {
     vldmail validator;
     validator = validate_email(address);
@@ -18,13 +26,8 @@ static void test(const wchar_t *address, int success) {
     if (!passed) printf("not ");
     printf("ok '%ls' should %s\n", address, success ? "pass" : "fail");
     if (validator.success == 0) {
-        /* a "diag" - already has \n */
-        fprintf(
-            stderr,
-            "#%s %ls",
-            passed ? " EXPECTED MESSAGE:" : "",
-            validator.message
-        );
+        if (passed) diag(L"EXPECTED MESSAGE:");
+        diag(validator.message);
     }
     test_counter++;
 }
@@ -32,7 +35,7 @@ static void test(const wchar_t *address, int success) {
 int main(void) {
     setlocale(LC_ALL, "");
 
-    printf("# Basic tests.\n");
+    note(L"Basic tests.");
 
     test(L"foo@bar.quux", 1);
     test(L"hügo@müller.berlin", 1);
@@ -40,7 +43,7 @@ int main(void) {
     test(L"🎃@emojiguy", 1); /* Valid if inside the local network ... */
 
     /* Tests from Wikipedia et al.: */
-    printf("# Advanced tests.\n");
+    note(L"Advanced tests.");
 
     test(L"foo@[192.168.0.1]", 1);
     test(L"\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com", 1); /* Valid thanks to quoting. */
