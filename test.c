@@ -19,6 +19,10 @@ static void diag(const wchar_t *message) {
     fprintf(stderr, "# %ls\n", message);
 }
 
+static void done_testing() {
+    printf("1..%d\n", test_counter);
+}
+
 static void test(const wchar_t *address, int success) {
     vldmail validator;
     validator = validate_email(address);
@@ -49,7 +53,7 @@ int main(void) {
     test(L"\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com", 1); /* Valid thanks to quoting. */
     test(L"\" \"@provider.tld", 1); /* Seems to be valid according to the RFCs. Wikipedia says otherwise. But there is no obvious reason for that. */
 
-    printf("1..%d\n", test_counter);
+    done_testing();
 
     return 0;
 }
