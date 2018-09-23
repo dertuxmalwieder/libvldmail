@@ -4,11 +4,14 @@
    Note that I assume Unicode here. No tests for ASCII frogs!
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <locale.h>
 #include <wchar.h>
 #include <vldmail.h>
 
+#define INPUTFILE "autotest-cases"
+#define MAXLINE 500 /* arbitrary */
 int test_counter = 0;
 
 static void note(const wchar_t *message) {
@@ -23,6 +26,11 @@ static void done_testing() {
     printf("1..%d\n", test_counter);
 }
 
+static void chomp(const wchar_t *wcs) {
+    wchar_t *newlineptr = wcschr(wcs, L'\n');
+    if (newlineptr) *newlineptr = 0;
+}
+
 static void test(const wchar_t *address, int success) {
     vldmail validator;
     validator = validate_email(address);
@@ -31,6 +39,7 @@ static void test(const wchar_t *address, int success) {
     printf("ok '%ls' should %s\n", address, success ? "pass" : "fail");
     if (validator.success == 0) {
         if (passed) diag(L"EXPECTED MESSAGE:");
+        chomp(validator.message);
         diag(validator.message);
     }
     test_counter++;
@@ -39,19 +48,32 @@ static void test(const wchar_t *address, int success) {
 int main(void) {
     setlocale(LC_ALL, "");
 
-    note(L"Basic tests.");
-
-    test(L"foo@bar.quux", 1);
-    test(L"hügo@müller.berlin", 1);
-    test(L"admin@localhost", 0); /* Tricky, but the RFC suggests that this is invalid. */
-    test(L"🎃@emojiguy", 1); /* Valid if inside the local network ... */
-
-    /* Tests from Wikipedia et al.: */
-    note(L"Advanced tests.");
-
-    test(L"foo@[192.168.0.1]", 1);
-    test(L"\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com", 1); /* Valid thanks to quoting. */
-    test(L"\" \"@provider.tld", 1); /* Seems to be valid according to the RFCs. Wikipedia says otherwise. But there is no obvious reason for that. */
+    FILE *inputs = fopen(INPUTFILE, "r");
+    if (!inputs) {
+        perror(INPUTFILE);
+        exit(1);
+    }
+    wchar_t line[MAXLINE];
+    while (fgetws(line, MAXLINE, inputs)) {
+        if (wcscmp(line, L"\n") == 0) continue; /* skip empty lines */
+        if (wcschr(line, L'#') == line) {
+            chomp(line);
+            note(line+1);
+            continue;
+        }
+        if (wcschr(line, L'1') == line) {
+            chomp(line);
+            test(line+2, 1);
+            continue;
+        }
+        if (wcschr(line, L'0') == line) {
+            chomp(line);
+            test(line+2, 0);
+            continue;
+        }
+        diag(L"IGNORING unknown line:");
+        diag(line);
+    }
 
     done_testing();
 
