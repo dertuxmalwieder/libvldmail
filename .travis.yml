@@ -14,4 +14,4 @@ before_script:
 
 script:
     - make
-    - ./vldmailtest
+    - prove -ve '' ./vldmailtest
