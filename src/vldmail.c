@@ -30,6 +30,9 @@ const int VLDMAIL_VERSION = 101; // 0.1.1
   break;
 
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+
 vldmail validate_email(const wchar_t address[320]) {
     setlocale(LC_ALL, "");
 
@@ -43,6 +46,7 @@ vldmail validate_email(const wchar_t address[320]) {
     unsigned char masked = 0;           /* 1 after a "\" */
     unsigned char in_quote = 0;         /* 1 inside quotation marks */
     unsigned char in_comment = 0;       /* 1 between "(" and ")" */
+    unsigned char has_deprecation_warning = 0;
 
     /* There can be exactly one comment on either end of the local or domain part,
        starting with "(" and ending with ")". Set checkmarks so we know where we are. */
@@ -55,7 +59,7 @@ vldmail validate_email(const wchar_t address[320]) {
     unsigned char domain_is_ip = 0;     /* 1 if IPv4, 2 if IPv6 */
     unsigned char domain_ip_octets = 0; /* the number of octets found if domain_is_ip > 0 */
 
-    wchar_t domain[255] = L""; /* Can hold the domain part so we can, like, parse it a second time. */
+    wchar_t domain[320] = L""; /* Can hold the domain part so we can, like, parse it a second time. */
 
 
     /* List of allowed ASCII characters in the local part
@@ -303,7 +307,7 @@ vldmail validate_email(const wchar_t address[320]) {
             /* Check if this codepoint - if ASCII - is actually allowed: */
             if (codepoint <= 128) {
                 int is_allowed = 0;
-                for (size_t i = 0; i < sizeof(allowed_domain_ascii); i++) {
+                for (size_t i = 0; i < ARRAY_SIZE(allowed_domain_ascii); i++) {
                     if (allowed_domain_ascii[i] == codepoint) {
                         is_allowed = 1;
                         break;
@@ -354,7 +358,10 @@ vldmail validate_email(const wchar_t address[320]) {
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
                                    addresses. Mark it as such. */
-                                wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                if (!has_deprecation_warning) {
+                                    wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                    has_deprecation_warning = 1;
+                                }
 #ifdef STRICT_VALIDATION
                                 /* The person who compiled libvldmail decided that we shouldn't allow that
                                    at all. */
@@ -375,7 +382,10 @@ vldmail validate_email(const wchar_t address[320]) {
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
                                    addresses. Mark it as such. */
-                                wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                if (!has_deprecation_warning) {
+                                    wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                    has_deprecation_warning = 1;
+                                }
 #ifdef STRICT_VALIDATION
                                 /* The person who compiled libvldmail decided that we shouldn't allow that
                                    at all. */
@@ -398,7 +408,7 @@ vldmail validate_email(const wchar_t address[320]) {
                 /* Check if this codepoint - if ASCII - is actually allowed: */
                 if (codepoint <= 128) {
                     int is_allowed = 0;
-                    for (size_t i = 0; i < sizeof(allowed_local_ascii); i++) {
+                    for (size_t i = 0; i < ARRAY_SIZE(allowed_local_ascii); i++) {
                         if (allowed_local_ascii[i] == codepoint) {
                             is_allowed  = 1;
                             break;
@@ -406,7 +416,7 @@ vldmail validate_email(const wchar_t address[320]) {
                     }
                     if (!is_allowed && in_quote) {
                         /* Inside a quote, additional characters are allowed. */
-                        for (size_t i = 0; i < sizeof(allowed_local_quoted_ascii); i++) {
+                        for (size_t i = 0; i < ARRAY_SIZE(allowed_local_quoted_ascii); i++) {
                             if (allowed_local_quoted_ascii[i] == codepoint && (masked || (codepoint != 34 && codepoint != 92))) {
                                 /* 34 and 92 have to be masked inside a quotation. */
                                 is_allowed  = 1;
