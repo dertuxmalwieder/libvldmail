@@ -46,6 +46,7 @@ vldmail validate_email(const wchar_t address[320]) {
     unsigned char masked = 0;           /* 1 after a "\" */
     unsigned char in_quote = 0;         /* 1 inside quotation marks */
     unsigned char in_comment = 0;       /* 1 between "(" and ")" */
+    unsigned char has_deprecation_warning = 0;
 
     /* There can be exactly one comment on either end of the local or domain part,
        starting with "(" and ending with ")". Set checkmarks so we know where we are. */
@@ -357,7 +358,10 @@ vldmail validate_email(const wchar_t address[320]) {
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
                                    addresses. Mark it as such. */
-                                wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                if (!has_deprecation_warning) {
+                                    wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                    has_deprecation_warning = 1;
+                                }
 #ifdef STRICT_VALIDATION
                                 /* The person who compiled libvldmail decided that we shouldn't allow that
                                    at all. */
@@ -378,7 +382,10 @@ vldmail validate_email(const wchar_t address[320]) {
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
                                    addresses. Mark it as such. */
-                                wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                if (!has_deprecation_warning) {
+                                    wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                    has_deprecation_warning = 1;
+                                }
 #ifdef STRICT_VALIDATION
                                 /* The person who compiled libvldmail decided that we shouldn't allow that
                                    at all. */
