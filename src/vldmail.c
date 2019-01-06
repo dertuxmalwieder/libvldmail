@@ -59,7 +59,7 @@ vldmail validate_email(const wchar_t address[320]) {
     unsigned char domain_is_ip = 0;     /* 1 if IPv4, 2 if IPv6 */
     unsigned char domain_ip_octets = 0; /* the number of octets found if domain_is_ip > 0 */
 
-    wchar_t domain[255] = L""; /* Can hold the domain part so we can, like, parse it a second time. */
+    wchar_t domain[320] = L""; /* Can hold the domain part so we can, like, parse it a second time. */
 
 
     /* List of allowed ASCII characters in the local part
