@@ -30,6 +30,9 @@ const int VLDMAIL_VERSION = 101; // 0.1.1
   break;
 
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+
 vldmail validate_email(const wchar_t address[320]) {
     setlocale(LC_ALL, "");
 
@@ -303,7 +306,7 @@ vldmail validate_email(const wchar_t address[320]) {
             /* Check if this codepoint - if ASCII - is actually allowed: */
             if (codepoint <= 128) {
                 int is_allowed = 0;
-                for (size_t i = 0; i < sizeof(allowed_domain_ascii); i++) {
+                for (size_t i = 0; i < ARRAY_SIZE(allowed_domain_ascii); i++) {
                     if (allowed_domain_ascii[i] == codepoint) {
                         is_allowed = 1;
                         break;
@@ -398,7 +401,7 @@ vldmail validate_email(const wchar_t address[320]) {
                 /* Check if this codepoint - if ASCII - is actually allowed: */
                 if (codepoint <= 128) {
                     int is_allowed = 0;
-                    for (size_t i = 0; i < sizeof(allowed_local_ascii); i++) {
+                    for (size_t i = 0; i < ARRAY_SIZE(allowed_local_ascii); i++) {
                         if (allowed_local_ascii[i] == codepoint) {
                             is_allowed  = 1;
                             break;
@@ -406,7 +409,7 @@ vldmail validate_email(const wchar_t address[320]) {
                     }
                     if (!is_allowed && in_quote) {
                         /* Inside a quote, additional characters are allowed. */
-                        for (size_t i = 0; i < sizeof(allowed_local_quoted_ascii); i++) {
+                        for (size_t i = 0; i < ARRAY_SIZE(allowed_local_quoted_ascii); i++) {
                             if (allowed_local_quoted_ascii[i] == codepoint && (masked || (codepoint != 34 && codepoint != 92))) {
                                 /* 34 and 92 have to be masked inside a quotation. */
                                 is_allowed  = 1;
