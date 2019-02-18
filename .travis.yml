@@ -10,6 +10,9 @@ env:
 before_script:
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake -DBUILD_THE_TEST=1 ..
 
-script: make
+script:
+    - make
+    - cp ../autotest-cases .
+    - prove -ve '' ./vldmailtest
