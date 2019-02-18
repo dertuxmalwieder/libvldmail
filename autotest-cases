@@ -1,0 +1,16 @@
+# Basic tests.
+
+1 foo@bar.quux
+1 hügo@müller.berlin
+# Tricky, but the RFC suggests that this is invalid:
+0 admin@localhost
+# Valid if inside the local network:
+1 🎃@emojiguy
+
+# Advanced tests from Wikipedia et al.
+
+1 foo@[192.168.0.1]
+# Valid thanks to quoting:
+1 "very.(),:;<>[]\".VERY.\"very@\\ \"very\".unusual"@strange.example.com
+# Seems to be valid according to the RFCs. Wikipedia says otherwise. But there is no obvious reason for that:
+1 " "@provider.tld
