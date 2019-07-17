@@ -10,6 +10,9 @@
 #include "vldmail.h"
 
 
+
+
+
 #ifndef NO_UNICODE_MAIL_PLEASE
 /* According to RFC 3629, UTF-8 ends at 4 bytes = 2,097,152 max. characters. */
 # define MAX_CODEPOINT 2097152
@@ -33,6 +36,7 @@ const int VLDMAIL_VERSION = 101; // 0.1.1
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 
+VLDMAIL_EXPORT
 vldmail validate_email(const wchar_t address[320]) {
     setlocale(LC_ALL, "");
 
