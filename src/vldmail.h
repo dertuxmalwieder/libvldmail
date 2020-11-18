@@ -1,4 +1,4 @@
-/* Copyright © 2018-19 Cthulhux <git_at_tuxproject_dot_de>
+/* Copyright Â© 2018-2020 Cthulhux <git_at_tuxproject_dot_de>
  * This work is free. You can redistribute it and/or modify it under the
  * terms of the Do What The Fuck You Want To Public License, Version 2,
  * as published by Sam Hocevar. See the COPYING file for more details. */
@@ -10,7 +10,7 @@
 
 
 #if defined (_MSC_VER) && !defined (__clang__)
-# define VLDMAIL_EXPORT __declspec(dllexport)
+# define VLDMAIL_EXPORT    __declspec(dllexport)
 #else
 # define VLDMAIL_EXPORT
 #endif
@@ -19,10 +19,10 @@
 VLDMAIL_EXPORT
 typedef struct {
     /*
-      "success" will be 0 or 1 where 1 is what you'll want to get, mostly.
-      "message" can contain additional deprecation warnings or validation errors.
-    */
-    int success;
+     * "success" will be 0 or 1 where 1 is what you'll want to get, mostly.
+     * "message" can contain additional deprecation warnings or validation errors.
+     */
+    int     success;
     wchar_t message[256];
 } vldmail;
 

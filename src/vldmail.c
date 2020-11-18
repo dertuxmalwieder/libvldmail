@@ -1,4 +1,4 @@
-/* Copyright © 2018 Cthulhux <git_at_tuxproject_dot_de>
+/* Copyright © 2018-2020 Cthulhux <git_at_tuxproject_dot_de>
  * This work is free. You can redistribute it and/or modify it under the
  * terms of the Do What The Fuck You Want To Public License, Version 2,
  * as published by Sam Hocevar. See the COPYING file for more details. */
@@ -10,15 +10,12 @@
 #include "vldmail.h"
 
 
-
-
-
 #ifndef NO_UNICODE_MAIL_PLEASE
 /* According to RFC 3629, UTF-8 ends at 4 bytes = 2,097,152 max. characters. */
-# define MAX_CODEPOINT 2097152
+# define MAX_CODEPOINT    2097152
 #else
 /* ASCII only. */
-# define MAX_CODEPOINT 128
+# define MAX_CODEPOINT    128
 #endif
 
 
@@ -27,13 +24,13 @@ const int VLDMAIL_VERSION = 101; // 0.1.1
 
 
 /* Loop leaving macro when a check fails: */
-#define BREAK_LOOP_FAIL(msg) \
-  ret.success = 0;           \
-  wcscat(ret.message, msg);  \
-  break;
+#define BREAK_LOOP_FAIL(msg)  \
+    ret.success = 0;          \
+    wcscat(ret.message, msg); \
+    break;
 
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define ARRAY_SIZE(arr)    (sizeof(arr) / sizeof((arr)[0]))
 
 
 VLDMAIL_EXPORT
@@ -46,84 +43,84 @@ vldmail validate_email(const wchar_t address[320]) {
     ret.success = 1;
     wcscpy(ret.message, L"");
 
-    unsigned char has_at = 0;           /* 1 after the first unmasked "@" - now the domain part starts */
-    unsigned char masked = 0;           /* 1 after a "\" */
-    unsigned char in_quote = 0;         /* 1 inside quotation marks */
+    unsigned char has_at     = 0;       /* 1 after the first unmasked "@" - now the domain part starts */
+    unsigned char masked     = 0;       /* 1 after a "\" */
+    unsigned char in_quote   = 0;       /* 1 inside quotation marks */
     unsigned char in_comment = 0;       /* 1 between "(" and ")" */
     unsigned char has_deprecation_warning = 0;
 
     /* There can be exactly one comment on either end of the local or domain part,
-       starting with "(" and ending with ")". Set checkmarks so we know where we are. */
-    unsigned char comment_local_end = 0;
+     * starting with "(" and ending with ")". Set checkmarks so we know where we are. */
+    unsigned char comment_local_end  = 0;
     unsigned char comment_domain_end = 0;
 
-    unsigned short len_local = 0;  /* Length of the local part (max. 64). */
-    unsigned short len_domain = 0; /* Length of the domain part (max. 255). */
+    unsigned short len_local  = 0;      /* Length of the local part (max. 64). */
+    unsigned short len_domain = 0;      /* Length of the domain part (max. 255). */
 
-    unsigned char domain_is_ip = 0;     /* 1 if IPv4, 2 if IPv6 */
+    unsigned char domain_is_ip     = 0; /* 1 if IPv4, 2 if IPv6 */
     unsigned char domain_ip_octets = 0; /* the number of octets found if domain_is_ip > 0 */
 
-    wchar_t domain[320] = L""; /* Can hold the domain part so we can, like, parse it a second time. */
+    wchar_t domain[320] = L"";          /* Can hold the domain part so we can, like, parse it a second time. */
 
 
     /* List of allowed ASCII characters in the local part
-       (outside quotation marks) unless used illegally as
-       checked before this point. UTF-8 characters above
-       U+007F are generally allowed unless compiled other-
-       wise. */
+     * (outside quotation marks) unless used illegally as
+     * checked before this point. UTF-8 characters above
+     * U+007F are generally allowed unless compiled other-
+     * wise. */
     const int allowed_local_ascii[] = {
         /* Numbers: */
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+        48,   49,  50,  51,  52,  53,  54,  55,  56,  57,
 
         /* Alphabet: */
-        65, 66, 67, 68, 69, 70, 71, 72, 73, 74,
-        75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-        85, 86, 87, 88, 89, 90,
-        97, 98, 99, 100, 101, 102, 103, 104, 105, 106,
+        65,   66,  67,  68,  69,  70,  71,  72,  73,  74,
+        75,   76,  77,  78,  79,  80,  81,  82,  83,  84,
+        85,   86,  87,  88,  89,  90,
+        97,   98,  99, 100, 101, 102, 103, 104, 105, 106,
         107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
         117, 118, 119, 120, 121, 122,
 
         /* Characters with a special function: */
-        34, 40, 41, 43, 46,
+        34,   40,  41,  43,  46,
 
         /* Other allowed special characters: */
-        33, 35, 36, 37, 38, 39, 42, 45, 47, 61, 63,
-        94, 95, 96, 123, 124, 125, 126
+        33,   35,  36,  37,  38,  39,  42,  45,  47,  61,63,
+        94,   95,  96, 123, 124, 125, 126
     };
 
     /* List of allowed ASCII characters in the local part
-       (inside quotation marks), extending the list above
-       (no duplicates). */
+     * (inside quotation marks), extending the list above
+     * (no duplicates). */
     const int allowed_local_quoted_ascii[] = {
         /* Note that \ (92) and " (34) MUST be masked when
-           used inside a quoted string. */
+         * used inside a quoted string. */
         32, 44, 58, 59, 60, 62, 64, 91, 92, 93
     };
 
     /* List of allowed ASCII characters in the domain part. */
     const int allowed_domain_ascii[] = {
         /* Numbers: */
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+        48,   49,  50,  51,  52,  53,  54,  55,  56,  57,
 
         /* Alphabet: */
-        65, 66, 67, 68, 69, 70, 71, 72, 73, 74,
-        75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-        85, 86, 87, 88, 89, 90,
-        97, 98, 99, 100, 101, 102, 103, 104, 105, 106,
+        65,   66,  67,  68,  69,  70,  71,  72,  73,  74,
+        75,   76,  77,  78,  79,  80,  81,  82,  83,  84,
+        85,   86,  87,  88,  89,  90,
+        97,   98,  99, 100, 101, 102, 103, 104, 105, 106,
         107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
         117, 118, 119, 120, 121, 122,
 
         /* Special characters (for IPs): */
-        46, 58, 91, 93,
+        46,   58,  91,  93,
 
         /* Special characters (otherwise): */
         45
     };
 
     for (size_t i = 0; i < wcslen(address); i++) {
-        int prev_codepoint = (i > 0 ? (int)address[i-1] : -1);
-        int codepoint = (int)address[i];
-        int next_codepoint = (i < wcslen(address) ? (int)address[i+1] : -1);
+        int prev_codepoint = (i > 0 ? (int)address[i - 1] : -1);
+        int codepoint      = (int)address[i];
+        int next_codepoint = (i < wcslen(address) ? (int)address[i + 1] : -1);
 
         /* ------------------------------------- */
         /* Common checks for both address parts: */
@@ -172,7 +169,7 @@ vldmail validate_email(const wchar_t address[320]) {
 
                 if ((comment_local_end && next_codepoint != 64) || (comment_domain_end && next_codepoint != -1)) {
                     /* On end comments, we assume an "@" (local) or "nothing" (domain) after the closing parenthesis.
-                       Something else is here. */
+                     * Something else is here. */
                     BREAK_LOOP_FAIL(L"Wrong comment syntax: unexpected character after the closing parenthesis.\n");
                 }
             }
@@ -229,10 +226,10 @@ vldmail validate_email(const wchar_t address[320]) {
                 }
                 else {
                     /* IP validation:
-                       We have a copy of the whole [...] part in <domain> by this
-                       point. We know from <domain_is_ip> that we have either an
-                       IPv4 or an IPv6. Parse them accordingly. */
-                    int ip_is_valid = 0;
+                     * We have a copy of the whole [...] part in <domain> by this
+                     * point. We know from <domain_is_ip> that we have either an
+                     * IPv4 or an IPv6. Parse them accordingly. */
+                    int ip_is_valid   = 0;
                     int current_block = 0;
 
                     switch (domain_is_ip) {
@@ -256,8 +253,8 @@ vldmail validate_email(const wchar_t address[320]) {
                                         goto switchend;
                                     }
 
-                                    wchar_t * pEnd;
-                                    long int blockparse = wcstol(token, &pEnd,10);
+                                    wchar_t *pEnd;
+                                    long int blockparse = wcstol(token, &pEnd, 10);
                                     if (blockparse > 255) {
                                         /* We can't have IPv4 parts > 255. */
                                         goto switchend;
@@ -267,6 +264,7 @@ vldmail validate_email(const wchar_t address[320]) {
                             }
                         }
                         break;
+
                     case 2:
                         if (domain_ip_octets == 5) {
                             /* Correct number of octets found. Parse... */
@@ -301,7 +299,7 @@ vldmail validate_email(const wchar_t address[320]) {
                         break;
                     }
 
-                switchend:
+switchend:
                     if (!ip_is_valid) {
                         BREAK_LOOP_FAIL(L"Erroneous IP address found - try again.\n");
                     }
@@ -337,7 +335,7 @@ vldmail validate_email(const wchar_t address[320]) {
 
                 /* The part after this is most likely the domain now. */
                 if (next_codepoint > -1) {
-                    wcscat(domain, &address[i+1]);
+                    wcscat(domain, &address[i + 1]);
                 }
 
                 continue;
@@ -361,14 +359,14 @@ vldmail validate_email(const wchar_t address[320]) {
                             }
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
-                                   addresses. Mark it as such. */
+                                 * addresses. Mark it as such. */
                                 if (!has_deprecation_warning) {
                                     wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
                                     has_deprecation_warning = 1;
                                 }
 #ifdef STRICT_VALIDATION
                                 /* The person who compiled libvldmail decided that we shouldn't allow that
-                                   at all. */
+                                 * at all. */
                                 ret.success = 0;
                                 break;
 #endif
@@ -385,14 +383,14 @@ vldmail validate_email(const wchar_t address[320]) {
                             }
                             else {
                                 /* The mix of dot strings and quoted strings is deprecated for new e-mail
-                                   addresses. Mark it as such. */
+                                 * addresses. Mark it as such. */
                                 if (!has_deprecation_warning) {
                                     wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
                                     has_deprecation_warning = 1;
                                 }
 #ifdef STRICT_VALIDATION
                                 /* The person who compiled libvldmail decided that we shouldn't allow that
-                                   at all. */
+                                 * at all. */
                                 ret.success = 0;
                                 break;
 #endif
@@ -414,7 +412,7 @@ vldmail validate_email(const wchar_t address[320]) {
                     int is_allowed = 0;
                     for (size_t i = 0; i < ARRAY_SIZE(allowed_local_ascii); i++) {
                         if (allowed_local_ascii[i] == codepoint) {
-                            is_allowed  = 1;
+                            is_allowed = 1;
                             break;
                         }
                     }
@@ -423,7 +421,7 @@ vldmail validate_email(const wchar_t address[320]) {
                         for (size_t i = 0; i < ARRAY_SIZE(allowed_local_quoted_ascii); i++) {
                             if (allowed_local_quoted_ascii[i] == codepoint && (masked || (codepoint != 34 && codepoint != 92))) {
                                 /* 34 and 92 have to be masked inside a quotation. */
-                                is_allowed  = 1;
+                                is_allowed = 1;
                                 break;
                             }
                         }
@@ -466,5 +464,5 @@ vldmail validate_email(const wchar_t address[320]) {
         wcscat(ret.message, L"This e-mail address does not seem to have a domain.\n");
     }
 
-    return ret;
+    return(ret);
 }
