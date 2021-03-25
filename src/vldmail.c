@@ -1,7 +1,8 @@
-/* Copyright © 2018-2020 Cthulhux <git_at_tuxproject_dot_de>
+/* Copyright © 2018-2021 Cthulhux <git_at_tuxproject_dot_de>
  * This work is free. You can redistribute it and/or modify it under the
- * terms of the Do What The Fuck You Want To Public License, Version 2,
- * as published by Sam Hocevar. See the COPYING file for more details. */
+ * terms of the MIT No Attribution license. See the file COPYING for
+ * details.
+ */
 
 #include <wchar.h>
 #include <locale.h>
@@ -20,7 +21,7 @@
 
 
 /* Export the version number: */
-const int VLDMAIL_VERSION = 101; // 0.1.1
+const int VLDMAIL_VERSION = 10000; // 1.0.0
 
 
 /* Loop leaving macro when a check fails: */
@@ -34,10 +35,10 @@ const int VLDMAIL_VERSION = 101; // 0.1.1
 
 
 VLDMAIL_EXPORT
-vldmail validate_email(const wchar_t address[320]) {
+valid_mail_t validate_email(const wchar_t address[320]) {
     setlocale(LC_ALL, "");
 
-    vldmail ret;
+    valid_mail_t ret;
 
     /* Init.: */
     ret.success = 1;

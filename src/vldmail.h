@@ -1,7 +1,8 @@
-/* Copyright © 2018-2020 Cthulhux <git_at_tuxproject_dot_de>
+/* Copyright © 2018-2021 Cthulhux <git_at_tuxproject_dot_de>
  * This work is free. You can redistribute it and/or modify it under the
- * terms of the Do What The Fuck You Want To Public License, Version 2,
- * as published by Sam Hocevar. See the COPYING file for more details. */
+ * terms of the MIT No Attribution license. See the file COPYING for
+ * details.
+ */
 
 #ifndef VLDMAIL_H
 #define VLDMAIL_H
@@ -24,9 +25,9 @@ typedef struct {
      */
     int     success;
     wchar_t message[256];
-} vldmail;
+} valid_mail_t;
 
 extern VLDMAIL_EXPORT const int VLDMAIL_VERSION;                          /* Contains the library version. */
-extern VLDMAIL_EXPORT vldmail validate_email(const wchar_t address[320]); /* Does all the work. */
+extern VLDMAIL_EXPORT valid_mail_t validate_email(const wchar_t address[320]); /* Does all the work. */
 
 #endif

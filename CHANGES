@@ -7,6 +7,11 @@ refer to the git log if you care about those as well.
 ------------------------------------------------------------
 
 
+1.0.0 [2021-03-25]:
+- BREAKING CHANGE: The vldmail type is valid_mail_t now.
+- Fixed a couple of bugs, including at least one possible buffer overflow. (Thank you, jibsen.)
+- Relicensed under the terms of the MIT-0 license.
+
 0.1.1 [2018-02-25]:
 - Introducing the BREAK_LOOP_FAIL macro. (Thank you, stsc.)
 - Improved output of one of the validation messages.

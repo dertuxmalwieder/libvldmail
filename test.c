@@ -4,11 +4,11 @@
    Note that I assume Unicode here. No tests for ASCII frogs!
 */
 
+#include "src/vldmail.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <locale.h>
 #include <wchar.h>
-#include <vldmail.h>
 
 #define INPUTFILE "autotest-cases"
 #define MAXLINE 500 /* arbitrary */
@@ -32,7 +32,7 @@ static void chomp(const wchar_t *wcs) {
 }
 
 static void test(const wchar_t *address, int success) {
-    vldmail validator;
+    valid_mail_t validator;
     validator = validate_email(address);
     int passed = validator.success == success;
     if (!passed) printf("not ");
