@@ -70,7 +70,7 @@ This should be enough.
 
 ## Donations (optional)
 
-`libvldmail` is free software by the terms of the [WTFPL](http://www.wtfpl.net/txt/copying/). As some people - including myself - like to contribute money for a good cause anyway, here are two possible options for you:
+`libvldmail` is free software by the terms of the MIT-0 license. As some people - including myself - like to contribute money for a good cause anyway, here are two possible options for you:
 
 ### Donate money to the nature:
 
