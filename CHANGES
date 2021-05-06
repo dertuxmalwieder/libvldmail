@@ -7,6 +7,11 @@ refer to the git log if you care about those as well.
 ------------------------------------------------------------
 
 
+1.1.0 [2021-05-06]:
+- Fixed validation of e-mail addresses which had an IP address as their domain part.
+- Style: "i" was used as a (shadowing) counter variable. This has been corrected.
+- Reworked the masking code - it should be more logical now.
+
 1.0.0 [2021-03-25]:
 - BREAKING CHANGE: The vldmail type is valid_mail_t now.
 - Fixed a couple of bugs, including at least one possible buffer overflow. (Thank you, jibsen.)

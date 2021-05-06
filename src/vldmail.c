@@ -21,7 +21,7 @@
 
 
 /* Export the version number: */
-const int VLDMAIL_VERSION = 10000; // 1.0.0
+const int VLDMAIL_VERSION = 10100; // 1.1.0
 
 
 /* Loop leaving macro when a check fails: */
@@ -121,7 +121,7 @@ valid_mail_t validate_email(const wchar_t address[320]) {
     for (size_t i = 0; i < wcslen(address); i++) {
         int prev_codepoint = (i > 0 ? (int)address[i - 1] : -1);
         int codepoint      = (int)address[i];
-        int next_codepoint = (i < wcslen(address) ? (int)address[i + 1] : -1);
+        int next_codepoint = (i < wcslen(address) - 1 ? (int)address[i + 1] : -1);
 
         /* ------------------------------------- */
         /* Common checks for both address parts: */
@@ -201,19 +201,19 @@ valid_mail_t validate_email(const wchar_t address[320]) {
                 BREAK_LOOP_FAIL(L"This address's domain part exceeds 255 characters.\n");
             }
 
-            if (codepoint == 46) {
-                /* IPv4? */
-                if (len_domain > 1 && domain_ip_octets > 0 && domain_is_ip != 2) {
-                    /* Probably. */
+            if (domain_ip_octets > 0) {
+                /* This domain is assumed to be an IP address with less than 256 characters.
+                   But which kind of IP address? */
+                if (codepoint == 46) {
+                    /* IPv4. */
+                    if (domain_is_ip == 0) domain_is_ip = 1;
                     domain_ip_octets++;
                     continue;
                 }
-            }
 
-            if (codepoint == 58) {
-                /* IPv6? */
-                if (len_domain > 1 && domain_ip_octets > 0 && domain_is_ip != 1) {
-                    /* Probably. */
+                if (codepoint == 58) {
+                    /* IPv6. */
+                    if (domain_is_ip == 0) domain_is_ip = 2;
                     domain_ip_octets++;
                     continue;
                 }
@@ -300,6 +300,8 @@ valid_mail_t validate_email(const wchar_t address[320]) {
                         break;
                     }
 
+                    ip_is_valid = 1; /* No errors had happened up to this point. */
+
 switchend:
                     if (!ip_is_valid) {
                         BREAK_LOOP_FAIL(L"Erroneous IP address found - try again.\n");
@@ -310,8 +312,8 @@ switchend:
             /* Check if this codepoint - if ASCII - is actually allowed: */
             if (codepoint <= 128) {
                 int is_allowed = 0;
-                for (size_t i = 0; i < ARRAY_SIZE(allowed_domain_ascii); i++) {
-                    if (allowed_domain_ascii[i] == codepoint) {
+                for (size_t j = 0; j < ARRAY_SIZE(allowed_domain_ascii); j++) {
+                    if (allowed_domain_ascii[j] == codepoint) {
                         is_allowed = 1;
                         break;
                     }
@@ -348,91 +350,89 @@ switchend:
                 BREAK_LOOP_FAIL(L"This address's local part exceeds 64 characters.\n");
             }
 
-            if (!masked) {
-                /* Check if we are inside a quotation or the quotation starts or ends: */
-                if (codepoint == 34) {
-                    if (in_quote) {
-                        /* Ending a quote -- or do we? */
-                        if (next_codepoint != 64) {
-                            if (next_codepoint != 40 && next_codepoint != 43 && next_codepoint != 46) {
-                                /* The next character must be either of [.(+@]. It is not. */
-                                BREAK_LOOP_FAIL(L"Wrong quotation (end).\n");
-                            }
-                            else {
-                                /* The mix of dot strings and quoted strings is deprecated for new e-mail
-                                 * addresses. Mark it as such. */
-                                if (!has_deprecation_warning) {
-                                    wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
-                                    has_deprecation_warning = 1;
-                                }
-#ifdef STRICT_VALIDATION
-                                /* The person who compiled libvldmail decided that we shouldn't allow that
-                                 * at all. */
-                                ret.success = 0;
-                                break;
-#endif
-                            }
-                        }
-                        in_quote = 0;
-                    }
-                    else {
-                        /* Starting a quote -- or do we? */
-                        if (prev_codepoint != -1) {
-                            if (prev_codepoint != 41 && prev_codepoint != 46) {
-                                /* The previous character must be either of [.)]. It is not. */
-                                BREAK_LOOP_FAIL(L"Wrong quotation (start).\n");
-                            }
-                            else {
-                                /* The mix of dot strings and quoted strings is deprecated for new e-mail
-                                 * addresses. Mark it as such. */
-                                if (!has_deprecation_warning) {
-                                    wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
-                                    has_deprecation_warning = 1;
-                                }
-#ifdef STRICT_VALIDATION
-                                /* The person who compiled libvldmail decided that we shouldn't allow that
-                                 * at all. */
-                                ret.success = 0;
-                                break;
-#endif
-                            }
-                        }
-                        in_quote = 1;
-                    }
-                }
+           /* Check for masking: */
+           if (codepoint == 92 && !masked) {
+               /* Backslash detected, mask the next character. */
+               masked = 1;
+               continue;
+           }
 
-                /* Check for masking: */
-                if (codepoint == 92) {
-                    /* Backslash detected, mask the next character. */
-                    masked = 1;
-                    continue;
-                }
-
-                /* Check if this codepoint - if ASCII - is actually allowed: */
-                if (codepoint <= 128) {
-                    int is_allowed = 0;
-                    for (size_t i = 0; i < ARRAY_SIZE(allowed_local_ascii); i++) {
-                        if (allowed_local_ascii[i] == codepoint) {
-                            is_allowed = 1;
+            /* Check if we are inside a quotation or the quotation starts or ends: */
+            if (codepoint == 34 && !masked) {
+                if (in_quote) {
+                    /* Ending a quote -- or do we? */
+                    if (next_codepoint != 64) {
+                        if (next_codepoint != 40 && next_codepoint != 43 && next_codepoint != 46) {
+                            /* The next character must be either of [.(+@]. It is not. */
+                            BREAK_LOOP_FAIL(L"Wrong quotation (end).\n");
+                        }
+                        else {
+                            /* The mix of dot strings and quoted strings is deprecated for new e-mail
+                             * addresses. Mark it as such. */
+                            if (!has_deprecation_warning) {
+                                wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                has_deprecation_warning = 1;
+                            }
+#ifdef STRICT_VALIDATION
+                            /* The person who compiled libvldmail decided that we shouldn't allow that
+                             * at all. */
+                            ret.success = 0;
                             break;
+#endif
                         }
                     }
-                    if (!is_allowed && in_quote) {
-                        /* Inside a quote, additional characters are allowed. */
-                        for (size_t i = 0; i < ARRAY_SIZE(allowed_local_quoted_ascii); i++) {
-                            if (allowed_local_quoted_ascii[i] == codepoint && (masked || (codepoint != 34 && codepoint != 92))) {
-                                /* 34 and 92 have to be masked inside a quotation. */
-                                is_allowed = 1;
-                                break;
-                            }
-                        }
-                    }
-                    if (!is_allowed) {
-                        /* Nope. */
-                        BREAK_LOOP_FAIL(L"Invalid character found outside a quotation.\n");
-                    }
+                    in_quote = 0;
                 }
-            }
+                else {
+                    /* Starting a quote -- or do we? */
+                    if (prev_codepoint != -1) {
+                        if (prev_codepoint != 41 && prev_codepoint != 46) {
+                            /* The previous character must be either of [.)]. It is not. */
+                            BREAK_LOOP_FAIL(L"Wrong quotation (start).\n");
+                        }
+                        else {
+                            /* The mix of dot strings and quoted strings is deprecated for new e-mail
+                             * addresses. Mark it as such. */
+                            if (!has_deprecation_warning) {
+                                wcscat(ret.message, L"Mixing dot strings and quoted strings is deprecated.\n");
+                                has_deprecation_warning = 1;
+                            }
+#ifdef STRICT_VALIDATION
+                            /* The person who compiled libvldmail decided that we shouldn't allow that
+                             * at all. */
+                            ret.success = 0;
+                            break;
+#endif
+                       }
+                   }
+                   in_quote = 1;
+               }
+           }
+
+           /* Check if this codepoint - if ASCII - is actually allowed: */
+           if (codepoint <= 128) {
+               int is_allowed = 0;
+               for (size_t j = 0; j < ARRAY_SIZE(allowed_local_ascii); j++) {
+                   if (allowed_local_ascii[j] == codepoint) {
+                       is_allowed = 1;
+                       break;
+                   }
+               }
+               if (!is_allowed && in_quote) {
+                   /* Inside a quote, additional characters are allowed. */
+                   for (size_t j = 0; j < ARRAY_SIZE(allowed_local_quoted_ascii); j++) {
+                       if (allowed_local_quoted_ascii[j] == codepoint && (masked || (codepoint != 34 && codepoint != 92))) {
+                           /* 34 and 92 have to be masked inside a quotation. */
+                           is_allowed = 1;
+                           break;
+                       }
+                   }
+               }
+               if (!is_allowed) {
+                   /* Nope. */
+                   BREAK_LOOP_FAIL(L"Invalid character found outside a quotation.\n");
+               }
+           }
 
             /* Close the mask after we're done processing the current character: */
             if (masked) {
