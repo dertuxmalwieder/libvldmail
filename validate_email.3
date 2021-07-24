@@ -1,0 +1,71 @@
+.Dd July 24, 2021
+.Dt VALIDATE_EMAIL 3
+.Os
+.Sh NAME
+.Nm validate_email
+.Nd validate an E-Mail address
+.Sh LIBRARY
+.Lb libvldmail
+.Sh SYNOPSIS
+.In wchar.h
+.In vldmail.h
+.Fd #define VLDMAIL_VERSION x
+.Ft valid_mail_t
+.Fo validate_email
+.Fa "const wchar_t address[320]"
+.Fc
+.Sh DESCRIPTION
+Validates an E-Mail
+.Fa address
+according to various standards published by the Internet Engineering
+Task Force.
+.Sh RETURN VALUES
+Returns a
+.Vt valid_mail_t
+which is defined as follows:
+.Bd -literal -offset indent
+typedef struct {
+	int success;
+	wchar_t message[256];
+} valid_mail_t;
+.Ed
+.Bl -tag -width success
+.It Fa success
+Boolean that indicates
+.Dv 0
+in case of an invalid or
+.Dv 1
+in case of a valid E-mail address.
+.It Fa message
+Additional deprecation warnings or validation errors.
+.El
+.Sh EXAMPLES
+.Bd -literal -offset indent
+#include <vldmail.h>
+
+int
+main(void)
+{
+	valid_mail_t validator = validate_email(L"foo@bar.quux");
+	if (0 == validator.success)
+	{
+		/* success == 0 means that something was wrong. */
+		printf(L"Validating foo@bar.quux failed: %ls\n",
+			validator.message);
+	}
+}
+.Ed
+.Sh STANDARDS
+Many standards are involved in the validation of an E-mail address.
+Most notably:
+.Bl -tag -width rfcxxxxx
+.It RFC 6531
+.Dq SMTP Extension for Internationalized Email
+.It RFC 5321
+.Dq Simple Mail Transfer Protocol
+.El
+.Sh AUTHORS
+The
+.Nm
+function was written by
+.An tux0r Aq Mt git@tuxproject.de .
