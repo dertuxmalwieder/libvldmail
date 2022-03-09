@@ -1,4 +1,4 @@
-# libvldmail [![Build Status](https://travis-ci.org/dertuxmalwieder/libvldmail.svg?branch=master)](https://travis-ci.org/dertuxmalwieder/libvldmail)
+# libvldmail
 
 Your friendly e-mail address validation library.
 
