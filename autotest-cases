@@ -10,6 +10,7 @@
 # Advanced tests from Wikipedia et al.
 
 1 foo@[192.168.0.1]
+1 foo@[IPv6:::1]
 # Valid thanks to quoting:
 1 "very.(),:;<>[]\".VERY.\"very@\\ \"very\".unusual"@strange.example.com
 # Seems to be valid according to the RFCs. Wikipedia says otherwise. But there is no obvious reason for that:

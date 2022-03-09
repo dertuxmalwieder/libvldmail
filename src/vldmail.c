@@ -1,4 +1,4 @@
-/* Copyright © 2018-2021 Cthulhux <git_at_tuxproject_dot_de>
+/* Copyright © 2018-2022 Cthulhux <git_at_tuxproject_dot_de>
  * This work is free. You can redistribute it and/or modify it under the
  * terms of the MIT No Attribution license. See the file COPYING for
  * details.
@@ -21,7 +21,7 @@
 
 
 /* Export the version number: */
-const int VLDMAIL_VERSION = 10100; // 1.1.0
+const int VLDMAIL_VERSION = 10200; // 1.2.0
 
 
 /* Loop leaving macro when a check fails: */
@@ -267,13 +267,26 @@ valid_mail_t validate_email(const wchar_t address[320]) {
                         break;
 
                     case 2:
-                        if (domain_ip_octets == 5) {
+                        if (domain_ip_octets > 3) {
                             /* Correct number of octets found. Parse... */
                             wchar_t *buffer;
                             wchar_t *token = wcstok(domain, L":", &buffer);
                             while (token) {
                                 current_block++;
-                                if (current_block > 5) {
+                                if (current_block == 1) {
+                                    if (wcsncmp(token, L"[IPv6", wcslen(token)) != 0) {
+                                        /* According to RFC 5321, IPv6 addresses are
+                                         * required to follow the format [IPv6:::...].
+                                         * If they don't, this is an error. */
+                                         goto switchend;
+                                    }
+
+                                    /* Skip this block: */
+                                    token = wcstok(NULL, L":", &buffer);
+                                    continue;
+                                }
+
+                                if (current_block > 9) {
                                     /* Somehow, this IP has too many blocks. */
                                     goto switchend;
                                 }
@@ -294,7 +307,7 @@ valid_mail_t validate_email(const wchar_t address[320]) {
                                     current_block_length++;
                                 }
 
-                                token = wcstok(NULL, L".", &buffer);
+                                token = wcstok(NULL, L":", &buffer);
                             }
                         }
                         break;

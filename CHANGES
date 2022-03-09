@@ -6,6 +6,9 @@ like the README and test.c are not considered here. Please
 refer to the git log if you care about those as well.
 ------------------------------------------------------------
 
+1.2.0 [2022-03-09]:
+- Fixed validation of IPv6 e-mail addresses (RFC 5321).
+- Added a test for them.
 
 1.1.0 [2021-05-06]:
 - Fixed validation of e-mail addresses which had an IP address as their domain part.
