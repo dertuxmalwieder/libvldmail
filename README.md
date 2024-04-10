@@ -1,4 +1,4 @@
-# libvldmail
+# ![build](https://github.com/dertuxmalwieder/libvldmail/actions/workflows/cmake-single-platform.yml/badge.svg) libvldmail
 
 Your friendly e-mail address validation library.
 
