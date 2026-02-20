@@ -7,6 +7,10 @@
 #ifndef VLDMAIL_H
 #define VLDMAIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
 #include <wchar.h>
 
 
@@ -29,5 +33,9 @@ typedef struct {
 
 extern VLDMAIL_EXPORT const int VLDMAIL_VERSION;                               /* Contains the library version. */
 extern VLDMAIL_EXPORT valid_mail_t validate_email(const wchar_t address[320]); /* Does all the work. */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

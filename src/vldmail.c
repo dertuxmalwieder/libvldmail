@@ -21,7 +21,7 @@
 
 
 /* Export the version number: */
-const int VLDMAIL_VERSION = 10200; // 1.2.0
+const int VLDMAIL_VERSION = 10201; // 1.2.1
 
 
 /* Loop leaving macro when a check fails: */

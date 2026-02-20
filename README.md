@@ -55,9 +55,9 @@ Use [CMake](https://cmake.org/) to create the `libvldmail` library, then link it
 
 ### Building the test file as well
 
-By default, CMake does not build `test.c` which tries to test the library's basic functions. If you want to test `libvldmail` using it, please just pass the parameter `BUILD_THE_TEST` to CMake:
+By default, CMake does not build `test.c` which tries to test the library's basic functions. If you want to test `libvldmail` using it, please just pass the parameter `LIBVLDMAIL_TESTS` to CMake:
 
-    cmake . -DBUILD_THE_TEST=1
+    cmake . -D LIBVLDMAIL_TESTS=ON
 
 ## Pre-built packages
 
