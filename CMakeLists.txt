@@ -10,7 +10,7 @@ project(
     DESCRIPTION "Your friendly e-mail address validation library."
     HOMEPAGE_URL "https://code.rosaelefanten.org/libvldmail/dir"
     LANGUAGES "C"
-    VERSION "1.2.0")
+    VERSION "1.2.1")
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -158,4 +158,8 @@ if(NOT ${LIBVLDMAIL_TESTS})
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
                   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/")
+
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/validate_email.3)
+        install(FILES "validate_email.3" DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+    endif()
 endif()
