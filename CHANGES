@@ -6,6 +6,10 @@ like the README and test.c are not considered here. Please
 refer to the git log if you care about those as well.
 ------------------------------------------------------------
 
+1.2.1 [2026-02-20]:
+- CMake got an overhaul.
+- Upstream repository got off GitHub and on Fossil. Mirrors remain.
+
 1.2.0 [2022-03-09]:
 - Fixed validation of IPv6 e-mail addresses (RFC 5321).
 - Added a test for them.
