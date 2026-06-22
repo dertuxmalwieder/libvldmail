@@ -7,7 +7,7 @@ Your friendly e-mail address validation library.
 * Did you know that parentheses, spaces and - according to the [RFC 6531](https://tools.ietf.org/html/rfc6531) document - emojis can be a part of a valid e-mail address?
 * Did you know that both IPv6 addresses and resources in your intranet are valid parts of the part after the "@", so requiring a TLD (*xxxx.yy*) is entirely wrong?
 
-Nor do all of the existing (and more complex than "is there an @ character?") validators I've come across. So this is my approach.
+Nor do most of the existing (and more complex than "is there an @ character?") validators I [and others](https://blog.jonasneubert.com/2026/02/02/email-address-validation/) have come across. So this is my approach.
 
 ## Features
 
@@ -19,11 +19,11 @@ Nor do all of the existing (and more complex than "is there an @ character?") va
 
 ### A note on Unicode support
 
-By default, `libvldmail` respects the latest internationalization standards, so Unicode characters are allowed in both the domain and the local part of the e-mail address you aim to have validated. If your service does not allow that, your service sucks and you should be ashamed. You can teach `libvldmail` to fall back to the good old ASCII days by defining the `NO_UNICODE_MAIL_PLEASE` preprocessor parameter.
+By default, `libvldmail` respects the latest internationalization standards, so Unicode characters are allowed in both the domain and the local part of the e-mail address you aim to have validated. If your service does not allow that, your service sucks and you should be ashamed. You can teach `libvldmail` to fall back to the good old ASCII days by defining `NO_UNICODE_MAIL_PLEASE`.
 
 ### A note on deprecation inside the RFCs
 
-Things change. E-mail addresses do not necessarily have to. By default, valid e-mail addresses are recognized as valid even if the standards say that you should not use them anymore. If you compile `libvldmail` with the `STRICT_VALIDATION` preprocessor parameter, however, the library will mark more "deprecated" addresses as invalid.
+Things change. E-mail addresses do not necessarily have to. By default, valid e-mail addresses are recognized as valid even if the standards say that you should not use them anymore. If you compile `libvldmail` with `-DSTRICT_VALIDATION`, however, the library will mark more "deprecated" addresses as invalid.
 
 ## Portability
 

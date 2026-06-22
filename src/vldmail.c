@@ -1,4 +1,4 @@
-/* Copyright © 2018-2022 Cthulhux <git_at_tuxproject_dot_de>
+/* Copyright © 2018-2026 Cthulhux <git_at_tuxproject_dot_de>
  * This work is free. You can redistribute it and/or modify it under the
  * terms of the MIT No Attribution license. See the file COPYING for
  * details.
@@ -21,7 +21,7 @@
 
 
 /* Export the version number: */
-const int VLDMAIL_VERSION = 10201; // 1.2.1
+const int VLDMAIL_VERSION = 10202; // 1.2.2
 
 
 /* Loop leaving macro when a check fails: */
@@ -50,6 +50,8 @@ valid_mail_t validate_email(const wchar_t address[320]) {
     unsigned char in_comment = 0;       /* 1 between "(" and ")" */
     unsigned char has_deprecation_warning = 0;
 
+    unsigned char domain_has_chars = 0; /* >0 if the domain has characters which aren't a number */
+
     /* There can be exactly one comment on either end of the local or domain part,
      * starting with "(" and ending with ")". Set checkmarks so we know where we are. */
     unsigned char comment_local_end  = 0;
@@ -58,7 +60,7 @@ valid_mail_t validate_email(const wchar_t address[320]) {
     unsigned short len_local  = 0;      /* Length of the local part (max. 64). */
     unsigned short len_domain = 0;      /* Length of the domain part (max. 255). */
 
-    unsigned char domain_is_ip     = 0; /* 1 if IPv4, 2 if IPv6 */
+    unsigned char domain_is_ip     = 0; /* 0 if actual domain, 1 if IPv4, 2 if IPv6 */
     unsigned char domain_ip_octets = 0; /* the number of octets found if domain_is_ip > 0 */
 
     wchar_t domain[320] = L"";          /* Can hold the domain part so we can, like, parse it a second time. */
@@ -83,7 +85,6 @@ valid_mail_t validate_email(const wchar_t address[320]) {
 
         /* Characters with a special function: */
         34,   40,  41,  43,  46,
-
         /* Other allowed special characters: */
         33,   35,  36,  37,  38,  39,  42,  45,  47,  61,63,
         94,   95,  96, 123, 124, 125, 126
@@ -110,6 +111,9 @@ valid_mail_t validate_email(const wchar_t address[320]) {
         97,   98,  99, 100, 101, 102, 103, 104, 105, 106,
         107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
         117, 118, 119, 120, 121, 122,
+
+        /* Characters with a special function: */
+        40,   41,
 
         /* Special characters (for IPs): */
         46,   58,  91,  93,
@@ -337,6 +341,12 @@ switchend:
                     BREAK_LOOP_FAIL(L"Invalid character found outside a quotation.\n");
                 }
             }
+
+            /* Add this codepoint to not-digits if it isn't a number.
+             * Numbers-only domains are invalid. */
+            if (!iswdigit(codepoint)) {
+                domain_has_chars++;
+            }
         }
         else {
             /* Local part validation. */
@@ -472,10 +482,16 @@ switchend:
         wcscat(ret.message, L"Quotation end tag is missing.\n");
     }
 
-    if (!has_at && ret.success) {
+    if (wcslen(domain) == 0 && ret.success) {
         /* No domain? :-( */
         ret.success = 0;
         wcscat(ret.message, L"This e-mail address does not seem to have a domain.\n");
+    }
+
+    if (domain_has_chars == 0 && ret.success) {
+        /* Numbers-only domain, NetBIOS violation */
+        ret.success = 0;
+        wcscat(ret.message, L"The domain is numbers-only, which is wrong.\n");
     }
 
     return(ret);

@@ -17,3 +17,8 @@
 
 # Seems to be valid according to the RFCs. Wikipedia says otherwise. But there is no obvious reason for that:
 1 " "@provider.tld
+
+# Stavros test cases, fixed in 1.2.2:
+0 foo@
+0 foo@1234567
+1 foo@bar.quux(comment)

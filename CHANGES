@@ -6,6 +6,9 @@ like the README and test.c are not considered here. Please
 refer to the Fossil log if you care about those as well.
 ------------------------------------------------------------
 
+1.2.2 [2026-06-22]:
+- Probably fixed Stavros's test cases v07, i01 and i11.
+
 1.2.1 [2026-02-20]:
 - CMake got an overhaul.
 
