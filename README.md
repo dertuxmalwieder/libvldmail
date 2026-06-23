@@ -31,19 +31,21 @@ You should be able to use `libvldmail` from inside Ruby, Python. Lisp etc. with 
 
 ## Usage
 
-    #include <vldmail.h>
+```c
+#include <vldmail.h>
+
+int main(void) {
+    /* ... your code ... */
     
-    int main(void) {
-        /* ... your code ... */
-        
-        valid_mail_t validator = validate_email(L"foo@bar.quux");
-        if (0 == validator.success) {
-            /* success == 0 means that something was wrong. */
-            printf(L"Validating foo@bar.quux failed: %ls\n", validator.message);
-        }
-        
-        /* ... more of your code ... */
+    valid_mail_t validator = validate_email(L"foo@bar.quux");
+    if (0 == validator.success) {
+        /* success == 0 means that something was wrong. */
+        printf(L"Validating foo@bar.quux failed: %ls\n", validator.message);
     }
+    
+    /* ... more of your code ... */
+}
+```
 
 ## Get the sources
 
@@ -51,13 +53,22 @@ Since August 2025, the canonical upstream repository is [on Fossil.](https://cod
 
 ## Building
 
-Use [CMake](https://cmake.org/) to create the `libvldmail` library, then link it into your application. And don't forget to point to the `vldmail.h` header.
+The easiest way is to use [CMake](https://cmake.org/) to create the `libvldmail` library. Example:
+
+```
+% cd libvldmail
+% mkdir build && cd build
+% cmake ..
+% cmake --build .
+```
+
+When finished, the `libvldmail` library will be available in your `build` folder.
 
 ### Building the test file as well
 
 By default, CMake does not build `test.c` which tries to test the library's basic functions. If you want to test `libvldmail` using it, please just pass the parameter `LIBVLDMAIL_TESTS` to CMake:
 
-    cmake . -D LIBVLDMAIL_TESTS=ON
+    % cmake .. -D LIBVLDMAIL_TESTS=ON
 
 ## Pre-built packages
 
@@ -69,12 +80,16 @@ A current version of `libvldmail` can be obtained from the [rosa-ebuilds](https:
 
 `libvldmail` tries to follow the [Semantic Versioning](https://semver.org/) scheme. You can ask for the current version via the API:
 
-    printf("libvldmail version %d", VLDMAIL_VERSION);
+```c
+printf("libvldmail version %d", VLDMAIL_VERSION);
+```
 
 We use simple mathematics here:
 
-    const int VLDMAIL_VERSION = 1;     // Version 0.0.1  (0 * 10^4 +  0 * 10^2 + 1 * 10^0)
-    const int VLDMAIL_VERSION = 21209; // Version 2.12.9 (2 * 10^4 + 12 * 10^2 + 9 * 10^0)
+```c
+const int VLDMAIL_VERSION = 1;     // Version 0.0.1  (0 * 10^4 +  0 * 10^2 + 1 * 10^0)
+const int VLDMAIL_VERSION = 21209; // Version 2.12.9 (2 * 10^4 + 12 * 10^2 + 9 * 10^0)
+```
 
 This should be enough.
 
