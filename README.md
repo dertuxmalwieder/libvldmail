@@ -47,6 +47,8 @@ int main(void) {
 }
 ```
 
+Stéphane Bortzmeyer has kindly contributed an [example command-line application](https://codeberg.org/dertuxmalwieder/libvldmail/pulls/1/files) that uses this library in order to validate e-mail addresses. Thank you!
+
 ## Get the sources
 
 Since August 2025, the canonical upstream repository is [on Fossil.](https://code.rosaelefanten.org/libvldmail) I provide Git mirrors on [Codeberg](https://codeberg.org/dertuxmalwieder/libvldmail/) and [Github](https://github.com/dertuxmalwieder/libvldmail) for the time being. They are synchronized every night.
