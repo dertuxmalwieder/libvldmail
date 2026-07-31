@@ -74,6 +74,10 @@ By default, CMake does not build `test.c` which tries to test the library's basi
 
 ## Pre-built packages
 
+### Arch Linux/AUR
+
+A community-maintained port of `libvldmail` is available [via the AUR.](https://aur.archlinux.org/packages/libvldmail)
+
 ### Gentoo
 
 A current version of `libvldmail` can be obtained from the [rosa-ebuilds](https://overlays.gentoo.org) overlay.
